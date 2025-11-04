@@ -12,7 +12,8 @@ const STATS = [
   "Summoner's Will",
 ];
 
-const GRADE = ['F', 'D', 'C', 'B', 'A', 'S', 'S+', 'S+', 'S++'];
+const GRADE = ['F', 'D', 'C', 'B', 'A', 'S', 'S+', 'S++'];
+const STAT_MAX = 7;
 
 export default function StatAllocator({
   values,
@@ -24,13 +25,13 @@ export default function StatAllocator({
 
   const glowStats = useMemo(() =>
     Object.fromEntries(
-      Object.entries(values).map(([k, v]) => [k, v >= 8])
+      Object.entries(values).map(([k, v]) => [k, v >= STAT_MAX])
     ), [values]
   );
 
   const adjust = (k, delta) => {
     const curr = values[k] ?? 0;
-    const next = Math.max(0, Math.min(8, curr + delta));
+    const next = Math.max(0, Math.min(STAT_MAX, curr + delta));
     const nextUsed = used - curr + next;
     if (nextUsed <= pointsTotal) {
       onChange({ ...values, [k]: next });
@@ -51,22 +52,22 @@ export default function StatAllocator({
               <div className="flex items-center gap-2">
                 <div className="w-36 text-sm text-white">{k}</div>
                 <div className="flex-1 h-3 bg-white/10 rounded overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-fuchsia-400 to-indigo-400" style={{ width: `${(v / 8) * 100}%` }} />
+                  <div className="h-full bg-gradient-to-r from-fuchsia-400 to-indigo-400" style={{ width: `${(v / STAT_MAX) * 100}%` }} />
                 </div>
                 <div className="w-10 text-center text-xs text-white/80">{v}</div>
                 <div className="w-12 text-center text-xs font-bold text-fuchsia-200">{GRADE[v]}</div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => adjust(k, -1)} className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-sm disabled:opacity-40" disabled={v <= 0}>-</button>
-                  <button onClick={() => adjust(k, +1)} className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-sm disabled:opacity-40" disabled={v >= 8 || remaining <= 0}>+</button>
+                  <button onClick={() => adjust(k, +1)} className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-sm disabled:opacity-40" disabled={v >= STAT_MAX || remaining <= 0}>+</button>
                 </div>
               </div>
             </div>
           );
         })}
       </div>
-      <p className="mt-3 text-[12px] text-white/70">Grades: F, D, C, B, A, S, S+, S++, with S++ glowing aura.</p>
+      <p className="mt-3 text-[12px] text-white/70">Grades: F, D, C, B, A, S, S+, S++. Maxing a stat at 7 (S++) glows.</p>
     </div>
   );
 }
 
-export { STATS, GRADE };
+export { STATS, GRADE, STAT_MAX };

@@ -1,6 +1,6 @@
 import React from 'react';
 
-// Summon pools keyed by tier 0-8. We only offer choices from 1..8; tier 0 yields small familiars.
+// Updated for STAT_MAX=7. Avatar at tier 7 lets you set one stat to 7 and adds +5 hidden Luck.
 const SUMMON_POOLS = {
   0: [
     { name: 'Wisp Sprite', buff: { Speed: 1 }, hiddenLuck: 0, info: '+1 Speed' },
@@ -35,31 +35,27 @@ const SUMMON_POOLS = {
     { name: 'Crystal Golem', buff: { Defense: 7 }, hiddenLuck: 0, info: '+7 Defense' },
   ],
   7: [
-    { name: 'Eclipse Dragon', buff: { Strength: 8 }, hiddenLuck: 0, info: '+8 Strength' },
-    { name: 'Abyss Leviathan', buff: { Endurance: 8 }, hiddenLuck: 0, info: '+8 Endurance' },
-    { name: 'Phoenix Ascendant', buff: { Speed: 8 }, hiddenLuck: 0, info: '+8 Speed' },
-  ],
-  8: [
-    { name: 'Dominion Avatar', buff: {}, hiddenLuck: 5, avatar: true, info: 'Set one stat to 8 (S++) and +5 Luck (hidden)' },
+    { name: 'Dominion Avatar', buff: {}, hiddenLuck: 5, avatar: true, info: 'Set one stat to 7 (S++) and +5 Luck (hidden)' },
   ],
 };
 
-const gradeOf = (v) => ['F','D','C','B','A','S','S+','S+','S++'][v] || 'F';
+const gradeOf = (v) => ['F','D','C','B','A','S','S+','S++'][v] || 'F';
 
 export default function SummonSelect({ stats, summon, onChoose }) {
   const will = stats["Summoner's Will"] ?? 0;
-  const tier = Math.max(0, Math.min(8, will));
+  const tier = Math.max(0, Math.min(7, will));
   const options = SUMMON_POOLS[tier] || [];
 
   const chooseAvatarStat = (k) => {
-    const newStats = { ...stats, [k]: 8 };
-    onChoose({ name: 'Dominion Avatar', buff: { [k]: 8 - (stats[k]||0) }, hiddenLuck: 5, avatar: true }, newStats);
+    const capped = 7;
+    const newStats = { ...stats, [k]: capped };
+    onChoose({ name: 'Dominion Avatar', buff: { [k]: capped - (stats[k]||0) }, hiddenLuck: 5, avatar: true }, newStats);
   };
 
   return (
     <div>
       <h2 className="text-xl font-bold text-white">Choose Summon</h2>
-      <p className="text-white/70 text-sm mb-3">Tier {tier} based on Summoner's Will ({stats["Summoner's Will"]}) · Top grades glow when S++.</p>
+      <p className="text-white/70 text-sm mb-3">Tier {tier} based on Summoner's Will ({stats["Summoner's Will"]}). Avatar at tier 7.</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {options.map((opt) => (
           <button
@@ -74,11 +70,11 @@ export default function SummonSelect({ stats, summon, onChoose }) {
       </div>
       {options.find(o=>o.avatar) && (
         <div className="mt-4 p-3 rounded-xl bg-gradient-to-r from-fuchsia-500/20 to-indigo-500/20 border border-white/10 text-white">
-          <div className="font-semibold mb-2">Dominion Avatar: set one stat to 8 (S++)</div>
+          <div className="font-semibold mb-2">Dominion Avatar: set one stat to 7 (S++)</div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {Object.keys(stats).map((k)=> (
               <button key={k} onClick={()=>chooseAvatarStat(k)} className="px-3 py-2 rounded bg-white/10 hover:bg-white/20 text-left">
-                {k} → <span className="font-bold">8</span> ({gradeOf(8)})
+                {k} → <span className="font-bold">7</span> ({gradeOf(7)})
               </button>
             ))}
           </div>

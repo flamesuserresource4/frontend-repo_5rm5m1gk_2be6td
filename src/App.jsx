@@ -1,16 +1,15 @@
 import React, { useMemo, useState } from 'react';
-import HeroCover from './components/HeroCover';
-import DominionWheel, { MATCHUPS } from './components/DominionWheel';
-import StatAllocator, { STATS } from './components/StatAllocator';
+import DominionReveal from './components/DominionReveal';
+import StatAllocator, { STATS, STAT_MAX } from './components/StatAllocator';
 import SummonSelect from './components/SummonSelect';
-import BattleArena, { POINTS_TOTAL, STAT_MAX, DOMINION_ADV_MULT, RANDOMNESS_RANGE } from './components/BattleArena';
+import BattleArena, { POINTS_TOTAL, DOMINION_ADV_MULT, RANDOMNESS_RANGE } from './components/BattleArena';
 
 const initialStats = Object.fromEntries(STATS.map((k)=>[k,0]));
 
 export default function App(){
   const [step, setStep] = useState('dominions');
-  const [p1Dom, setP1Dom] = useState('Titanus');
-  const [p2Dom, setP2Dom] = useState('Aethera');
+  const [p1Dom, setP1Dom] = useState(null);
+  const [p2Dom, setP2Dom] = useState(null);
   const [p1Stats, setP1Stats] = useState({ ...initialStats });
   const [p2Stats, setP2Stats] = useState({ ...initialStats });
   const [p1Summon, setP1Summon] = useState(null);
@@ -28,11 +27,13 @@ export default function App(){
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0b0f16] to-[#0b0f16] text-white">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0c13] via-[#0b0f16] to-[#0b0f16] text-white">
       <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
-        <HeroCover />
+        <div className="rounded-2xl p-6 bg-gradient-to-br from-fuchsia-500/10 to-indigo-500/10 border border-white/10">
+          <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight">Dominion Clash: <span className="text-fuchsia-300">Soul Arena</span></h1>
+          <p className="mt-2 text-sm md:text-base text-white/80">A hot-seat anime duel for desktop and iPad. Destiny assigns dominions. You build, summon, and clash to 3.</p>
+        </div>
 
-        {/* Flow Controls */}
         <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-white/70">
           {['Dominion','Stats','Summon','Ready','Battle','Summary'].map((label, idx) => (
             <div key={label} className={`px-3 py-1 rounded-full border ${idx===0 && step==='dominions'?'bg-fuchsia-500/20 border-fuchsia-400/40':''}
@@ -46,11 +47,10 @@ export default function App(){
         </div>
 
         {step === 'dominions' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <DominionWheel value={p1Dom} onChange={setP1Dom} playerLabel="P1" />
-            <DominionWheel value={p2Dom} onChange={setP2Dom} playerLabel="P2" />
-            <div className="lg:col-span-2 flex justify-end">
-              <button onClick={()=>setStep('statsP1')} className="px-4 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 font-bold">Confirm Dominions</button>
+          <div className="space-y-4">
+            <DominionReveal p1={p1Dom} p2={p2Dom} onReveal={(d1,d2)=>{ setP1Dom(d1); setP2Dom(d2); }} />
+            <div className="flex justify-end">
+              <button disabled={!p1Dom || !p2Dom} onClick={()=>setStep('statsP1')} className="px-4 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 font-bold disabled:opacity-50">Lock In & Continue</button>
             </div>
           </div>
         )}
@@ -145,23 +145,11 @@ export default function App(){
               {result?.log.map((l,i)=>(<div key={i} className="mb-2">{l}</div>))}
             </div>
             <div className="flex justify-between">
-              <button onClick={()=>{ setStep('dominions'); setP1Stats({...initialStats}); setP2Stats({...initialStats}); setP1Summon(null); setP2Summon(null); setResult(null); }} className="px-3 py-2 rounded bg-white/10">Play Again</button>
-              <a href="#spec" className="px-3 py-2 rounded bg-white/10">View Spec</a>
+              <button onClick={()=>{ setStep('dominions'); setP1Stats({...initialStats}); setP2Stats({...initialStats}); setP1Summon(null); setP2Summon(null); setResult(null); setP1Dom(null); setP2Dom(null); }} className="px-3 py-2 rounded bg-white/10">Play Again</button>
+              <div className="px-3 py-2 rounded bg-white/10 text-white/70 text-sm">POINTS_TOTAL={POINTS_TOTAL} · STAT_MAX={STAT_MAX} · DOMINION_ADV_MULT={DOMINION_ADV_MULT} · RANDOMNESS_RANGE=±{RANDOMNESS_RANGE*100}%</div>
             </div>
           </div>
         )}
-
-        {/* Spec & Constants */}
-        <div id="spec" className="rounded-2xl p-6 bg-white/5 border border-white/10">
-          <div className="text-xl font-bold mb-2">Project Spec & Constants</div>
-          <ul className="text-sm text-white/80 list-disc pl-5 space-y-1">
-            <li>Flow: Dominion → Stat Assignment → Summon → Ready → Battle (FT3) → Summary</li>
-            <li>POINTS_TOTAL={POINTS_TOTAL}, STAT_MAX={STAT_MAX}, DOMINION_ADV_MULT={DOMINION_ADV_MULT}, RANDOMNESS_RANGE=±{RANDOMNESS_RANGE*100}%</li>
-            <li>Touch-friendly buttons and large hit targets ensure iPad playability.</li>
-            <li>Strong/Weak matchups apply ±25% to total power.</li>
-            <li>Hidden Luck from summons tilts outcome by +0.5% per Luck point.</li>
-          </ul>
-        </div>
       </div>
     </div>
   );
